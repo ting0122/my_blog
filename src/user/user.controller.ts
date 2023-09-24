@@ -16,17 +16,17 @@ export class UserController {
     }
 
     @Get(':id')
-    findUserById(@Param('id') id: string){
+    findUserById(@Param('id') id: number){
         return this.userService.findUserById(id);
     }
 
     @Put(':id')
-    updateUser(@Param('id') id: string,@Body() userData: any){
+    updateUser(@Param('id') id: number,@Body() userData: any){
         return this.userService.updateUser(id, userData);
     }
 
     @Delete(':id')
-    deleteUser(@Param('id') id: string){
+    deleteUser(@Param('id') id: number){
         return this.userService.deleteUser(id);
     }
 

@@ -7,7 +7,8 @@ import { CommentModule } from './comment/comment.module';
 import { TagModule } from './tag/tag.module';
 import { ConfigService } from './config/config.service';
 import databaseConfig from './config/database.config';
-import { ConfigModule } from '@nestjs/config/dist';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -16,9 +17,16 @@ import { ConfigModule } from '@nestjs/config/dist';
     CommentModule, 
     TagModule,
     ConfigModule.forRoot({
-        isGlobal: true,
         load:[databaseConfig],
-    })
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '123',
+      database: 'test',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],
