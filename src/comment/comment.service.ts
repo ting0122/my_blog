@@ -1,41 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class CommentService {
-    private readonly comments: any[]=[];
+    constructor(
+        @InjectRepository(Comment)
+        private readonly commentRepository: Repository<Comment>,
+    ){}
 
-    createComment(commentData: any){
-        const newComment = {id: Date.now(), ...commentData};
-        this.comments.push(newComment);
-        return newComment;
+    async createComment(commentData: Partial<Comment>): Promise<Comment> {
+        const comment = this.commentRepository.create(commentData);
+        return await this.commentRepository.save(comment);
     }
 
-    findAllComments(){
-        return this.comments;
+    async findCommentById(BlogId: number): Promise<Comment[]> {
+        return await this.commentRepository.find({
+            where: { blog: {id: BlogId}},
+        });
     }
 
-    findCommentById(id: string){
-        return this.comments.find(comment => comment.id === +id);
-    }
-
-    updateComment(id: string, commentData: any){
-        const commentIndex = this.comments.findIndex(comment => comment.id === +id);
-        if(commentIndex>=0){
-            this.comments[commentIndex] = {...this.comments[commentIndex], commentData};
-            return this.comments[commentIndex];
+    async updateComment(commentId: number, commentData: Partial<Comment>): Promise<Comment[]> {
+        const comment = await this.commentRepository.findOne({where: {id: commentId}});
+        if(!comment){
+            throw new NotFoundException('Comment not found');
         }
-        return null;
+
+        await this.commentRepository.update(commentId, commentData);
+
+        return await this.commentRepository.find({where: {id: commentId}});
     }
 
-    deleteComment(id: string){
-        const commentIndex = this.comments.findIndex(comment => comment.id === +id);
-        if(commentIndex>=0){
-            const deleteComment = this.comments.slice(commentIndex,1);
-            return this.comments[0];
+    async deleteComment(commentId: number): Promise<void> {
+        const comment = await this.commentRepository.findOne({where: {id: commentId}});
+        if(!comment){
+            throw new NotFoundException('Comment not found');
         }
-        return null;
+        await this.commentRepository.remove(comment);
     }
-
-
-
 }

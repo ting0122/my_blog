@@ -1,38 +1,32 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Blog } from './entities/blog.entity';
 
 @Injectable()
 export class BlogService {
-    private readonly blogPosts: any[]=[];
+    constructor(@InjectRepository(Blog)
+    private blogRepository: Repository<Blog>,
+    ){}
 
-    create(postData: any){
-        const newPost = {id: Date.now, ...postData};
-        this.blogPosts.push(newPost);
-        return newPost;
+    async create(postData: Blog): Promise<Blog> {
+        return this.blogRepository.save(postData);
     }
 
-    findAll(){
-        return this.blogPosts;
+    async findAll(): Promise<Blog[]> {
+        return this.blogRepository.find();
     }
 
-    findOne(id: string){
-        return this.blogPosts.find(post => post.id === +id);
+    async findOne(id: number): Promise<Blog | undefined>{
+        return this.blogRepository.findOneBy({id});
     }
 
-    update(id: string, postData: any){
-        const postIndex = this.blogPosts.findIndex(post => post.id ===+id);
-        if(postIndex >= 0){
-            this.blogPosts[postIndex] = {...this.blogPosts[postIndex], ...postData};
-            return this.blogPosts[postIndex];
-        }
-        return null;
+    async update(id: number, postData: Blog): Promise<Blog | undefined>{
+        await this.blogRepository.update(id, postData);
+        return this.blogRepository.findOneBy({id});
     }
 
-    remove(id: string){
-        const postIndex = this.blogPosts.findIndex(post => post.id ===+id);
-        if(postIndex >= 0){
-            const deletedPost = this.blogPosts.slice(postIndex, 1);
-            return deletedPost[0];
-        }
-        return null;
+    async remove(id: number): Promise<void> {
+        await this.blogRepository.delete(id);
     }
 }
