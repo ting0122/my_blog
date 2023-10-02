@@ -1,5 +1,6 @@
 import { Comment } from "src/comment/entities/comment.entity";
-import { Entity, Column, PrimaryColumn, OneToMany } from "typeorm";
+import { tag } from "src/tag/entities/tag.entity";
+import { Entity, Column, PrimaryColumn, OneToMany, ManyToMany, JoinTable } from "typeorm";
 
 @Entity()
 export class Blog {
@@ -16,4 +17,7 @@ export class Blog {
     @OneToMany(()=>Comment, (comment)=>comment.blog)
     comments: Comment[];
 
+    @ManyToMany(()=> tag, (tag)=>tag.blogs)
+    @JoinTable()
+    tags: tag[];
 }

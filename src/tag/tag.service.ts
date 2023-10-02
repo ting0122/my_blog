@@ -1,38 +1,40 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { tag } from './entities/tag.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TagService {
-    private readonly tags: any[]=[];
+    constructor(
+        @InjectRepository(tag)
+        private readonly tagRepository: Repository<tag>,
+    ){}
 
-    createTag(tagData: any){
-        const newTag = { id: Date.now(), ...tagData };
-        this.tags.push(newTag);
-        return newTag;
+    async createTag(tagData: tag){
+        const tag = this.tagRepository.create(tagData);
+        return this.tagRepository.save(tag);
     }
 
-    findAllTags(){
-        return this.tags;
+    async findAllTags(){
+        return this.tagRepository.find();
     }
 
-    findTagById(id: string){
-        return this.tags.find(tag => tag.id ===+id);
-    }
-
-    updateTag(id: string, tagData: any){
-        const tagIndex = this.tags.findIndex(tag => tag.id === +id);
-        if(tagIndex>=0){
-            this.tags[tagIndex] = { ...this.tags[tagIndex], ...tagData };
-            return this.tags[tagIndex];
+    async findTagById(id: number){
+        const tag = await this.tagRepository.findOneBy({id});
+        if(!tag){
+            throw new NotFoundException('Tag not found');
         }
-        return null;
+        return tag;
     }
 
-    deleteTag(id: string){
-        const tagIndex = this.tags.findIndex(tag => tag.id === +id);
-        if(tagIndex>=0){
-            const deleteTag = this.tags.splice(tagIndex, 1);
-            return deleteTag[0];
-        }
-        return null;
+    async updateTag(id: number, tagData: tag){
+        await this.findTagById(id);
+        await this.tagRepository.update(id, tagData);
+        return this.findTagById(id);
+    }
+
+    async deleteTag(id: number){
+        const tag = await this.findTagById(id);
+        return this.tagRepository.remove(tag);
     }
 }

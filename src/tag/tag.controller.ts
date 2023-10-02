@@ -1,12 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { TagService } from './tag.service';
+import { tag } from './entities/tag.entity';
 
 @Controller('tag')
 export class TagController {
     constructor(private readonly tagService: TagService) {}
 
     @Post()
-    createTag(@Body() tagData: any){
+    createTag(@Body() tagData: tag){
         return this.tagService.createTag(tagData);
     }
 
@@ -16,17 +17,17 @@ export class TagController {
     }
 
     @Get(':id')
-    findTagById(@Param('id') id: string){
+    findTagById(@Param('id') id: number){
         return this.tagService.findTagById(id);
     }
 
     @Put(':id')
-    updateTag(@Param('id') id: string, @Body() tagData: any){
+    updateTag(@Param('id') id: number, @Body() tagData: tag){
         return this.tagService.updateTag(id, tagData);
     }
 
     @Delete(':id')
-    deleteTag(@Param('id') id: string){
+    deleteTag(@Param('id') id: number){
         return this.tagService.deleteTag(id);
     }
 
